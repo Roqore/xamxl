@@ -7,6 +7,7 @@ pipeline {
         REPO_NAME = 'xamxl'
         APP_PATH = "/var/www/${REPO_NAME}"
         HOST = 'xamxl.roqore.com'       // Nginx hostname for SSH connection
+        PATH = "/usr/bin:/usr/local/bin:${env.PATH}"
     }
 
     stages {
