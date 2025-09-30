@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DEPLOY_BRANCH = 'main'
+        DEPLOY_BRANCH = 'origin/main'
         ORG_NAME = 'Roqore'
         REPO_NAME = 'xamxl'
         APP_PATH = "/var/www/${REPO_NAME}"
