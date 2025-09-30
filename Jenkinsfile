@@ -7,7 +7,6 @@ pipeline {
         REPO_NAME = 'xamxl'
         APP_PATH = "/var/www/${REPO_NAME}"
         HOST = 'xamxl.roqore.com'       // Nginx hostname for SSH connection
-        PATH = "/usr/bin:/usr/local/bin:${env.PATH}"
     }
 
     stages {
@@ -27,9 +26,9 @@ pipeline {
                 expression { env.DEPLOY_BRANCH == 'main' }
             }
             steps {
-                sh 'npm install'
-                sh 'npm run build'
-                sh 'npm test'
+                sh '/usr/bin/npm install'
+                sh '/usr/bin/npm run build'
+                sh '/usr/bin/npm test'
             }
         }
 
