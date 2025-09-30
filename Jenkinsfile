@@ -2,26 +2,29 @@ pipeline {
     agent any
 
     environment {
-        DEPLOY_BRANCH = 'origin/main'
+        DEPLOY_BRANCH = 'main'           // Always the Git branch you want to deploy
         ORG_NAME = 'Roqore'
         REPO_NAME = 'xamxl'
         APP_PATH = "/var/www/${REPO_NAME}"
-        HOST = 'xamxl.roqore.com'  // Nginx hostname (used for SSH connection)
+        HOST = 'xamxl.roqore.com'       // Nginx hostname for SSH connection
     }
 
     stages {
 
         stage('Checkout') {
             steps {
+                // Checkout branch dynamically so webhook and manual triggers work
                 checkout([$class: 'GitSCM',
-                    branches: [[name: "refs/heads/${env.DEPLOY_BRANCH}"]],
+                    branches: [[name: "*/${env.DEPLOY_BRANCH}"]],
                     userRemoteConfigs: [[url: "https://github.com/${env.ORG_NAME}/${env.REPO_NAME}.git"]]
                 ])
             }
         }
 
         stage('Install & Build') {
-            when { branch env.DEPLOY_BRANCH }
+            when {
+                expression { env.BRANCH_NAME == env.DEPLOY_BRANCH }
+            }
             steps {
                 sh 'npm install'
                 sh 'npm run build'
@@ -30,20 +33,22 @@ pipeline {
         }
 
         stage('Deploy') {
-            when { branch env.DEPLOY_BRANCH }
+            when {
+                expression { env.BRANCH_NAME == env.DEPLOY_BRANCH }
+            }
             steps {
                 withCredentials([
                     sshUserPrivateKey(credentialsId: 'do-ssh', keyFileVariable: 'SSH_KEY')
                 ]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no -i \$SSH_KEY root@${env.HOST} '
-                            # Install Node.js LTS if not installed
+                            # Install Node.js LTS if missing
                             if ! command -v node >/dev/null 2>&1; then
                                 curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
                                 apt-get install -y nodejs build-essential
                             fi
 
-                            # Install PM2 globally if not installed
+                            # Install PM2 globally if missing
                             if ! command -v pm2 >/dev/null 2>&1; then
                                 npm install -g pm2
                             fi
@@ -51,7 +56,7 @@ pipeline {
                             # Create /var/www if missing
                             mkdir -p /var/www
 
-                            # Clone repo if the app path does not exist
+                            # Clone repo if app path does not exist
                             if [ ! -d "${env.APP_PATH}" ]; then
                                 git clone -b ${env.DEPLOY_BRANCH} https://github.com/${env.ORG_NAME}/${env.REPO_NAME}.git ${env.APP_PATH}
                             else
