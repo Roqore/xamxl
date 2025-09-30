@@ -36,9 +36,9 @@ pipeline {
                 expression { env.DEPLOY_BRANCH == 'main' }
             }
             steps {
-                sh '/usr/bin/npm install'
-                sh '/usr/bin/npm run build'
-                sh '/usr/bin/npm test'
+                sh 'npm install'
+                sh 'npm run build'
+                sh 'npm test'
             }
         }
 
