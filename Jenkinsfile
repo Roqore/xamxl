@@ -11,6 +11,15 @@ pipeline {
 
     stages {
 
+        stage('Debug PATH') {
+            steps {
+                sh 'echo $PATH'
+                sh 'ls -l /usr/bin/npm'
+                sh 'node -v'
+                sh 'npm -v'
+            }
+        }
+
         stage('Checkout') {
             steps {
                 // Checkout branch dynamically so webhook and manual triggers work
