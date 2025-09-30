@@ -23,7 +23,7 @@ pipeline {
 
         stage('Install & Build') {
             when {
-                expression { env.BRANCH_NAME == env.DEPLOY_BRANCH }
+                expression { env.DEPLOY_BRANCH == 'main' }
             }
             steps {
                 sh 'npm install'
@@ -34,7 +34,7 @@ pipeline {
 
         stage('Deploy') {
             when {
-                expression { env.BRANCH_NAME == env.DEPLOY_BRANCH }
+                expression { env.DEPLOY_BRANCH == 'main' }
             }
             steps {
                 withCredentials([
